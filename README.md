@@ -3,7 +3,7 @@ Script to detect cells in microfluidics content and calculate the extracellular 
 
 Networks used: MobileNets, Inception v2
 
-script description:<br>
+Files description:<br><br>
 0 - extracts the roi of the cell for further analysis<br>
 1 - divides empty droplets and droplets containing cells<br>
 2 - divides empty droplets and droplets containing cells using both the networks<br>
