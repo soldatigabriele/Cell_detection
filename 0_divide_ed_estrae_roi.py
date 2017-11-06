@@ -3,6 +3,9 @@ Inserire le immagini da analizzare in '/immagini_da_dividere/input/432346.jpg'
 Lo script cancellera' i risultati delle analisi precedenti
 '''
 
+from pyexcel.cookbook import merge_all_to_a_book
+import pandas as pd
+import glob
 import numpy as np
 from PIL import Image
 import os
@@ -48,7 +51,8 @@ ROI_DIRECTORY = os.path.join(OUTPUT, 'roi')
 ROI_DIRECTORY_NORM = os.path.join(OUTPUT, 'roi_norm')
 
 DIVISE = os.path.join(DIR,'output')
-FILE_NAME=os.path.join(DIR,'summary_rois.csv'.format(MODEL_NAME,AREA_THRESH,SCORE_THRESH))
+FILE_NAME=os.path.join(DIR,'summary_rois.csv')
+FILE_NAME_XLSX = os.path.join(DIR,'summary_rois.xlsx')
 
 with open(FILE_NAME, 'w') as f:
     f.write('dir1,dir2,name,area,file_name\n')
@@ -72,6 +76,9 @@ def load_image_into_numpy_array(image):
 
 if os.path.exists(DIVISE):
     shutil.rmtree(DIVISE)
+
+if os.path.exists(FILE_NAME_XLSX):
+    os.unlink(FILE_NAME_XLSX)
 
 os.makedirs(DIVISE)
 os.makedirs(SAVE_DIRECTORY_EMPTY)
@@ -163,3 +170,15 @@ for image in tqdm(os.listdir(ROI_DIRECTORY_NORM)):
         new_img = Image.fromarray(normalize(arr).astype('uint8'),'RGBA')
         new_img.save(os.path.join(ROI_DIRECTORY_NORM,image))
 
+#convert the csv to xlsx
+
+merge_all_to_a_book(glob.glob(FILE_NAME), FILE_NAME_XLSX)
+
+#sort the excel columns by cell name (the area of the cell) using panda
+
+xl = pd.ExcelFile(FILE_NAME_XLSX)
+df = xl.parse("summary_rois.csv")
+df = df.sort_values(by=['file_name'])
+writer = pd.ExcelWriter(FILE_NAME_XLSX)
+df.to_excel(writer,sheet_name='summary_rois.csv',index=False)
+writer.save()
