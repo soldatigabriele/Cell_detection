@@ -4,6 +4,7 @@ Lo script cancellera' i risultati delle analisi precedenti
 '''
 
 import numpy as np
+from PIL import Image
 import os
 import six.moves.urllib as urllib
 import sys
@@ -27,7 +28,7 @@ sys.path.append("..")
 MODEL_NAME = 'cell_graph_inception'
 MODEL_NAME = 'cell_graph_1'
 MODEL_NAME = 'cell_graph_500_inception'
-# MODEL_NAME = 'cell_graph_500_mobilenet'
+MODEL_NAME = 'cell_graph_500_mobilenet'
 PATH_TO_CKPT = MODEL_NAME + '/frozen_inference_graph.pb'
 PATH_TO_LABELS = os.path.join('training', 'object-detection.pbtxt')
 NUM_CLASSES = 1
@@ -44,12 +45,13 @@ SAVE_DIRECTORY_ONE =  os.path.join(OUTPUT, 'full')
 SAVE_DIRECTORY_CELLS = os.path.join(OUTPUT, 'cells')
 SAVE_DIRECTORY_EMPTY = os.path.join(OUTPUT, 'empty')
 ROI_DIRECTORY = os.path.join(OUTPUT, 'roi')
+ROI_DIRECTORY_NORM = os.path.join(OUTPUT, 'roi_norm')
 
 DIVISE = os.path.join(DIR,'output')
 FILE_NAME=os.path.join(DIR,'summary_rois.csv'.format(MODEL_NAME,AREA_THRESH,SCORE_THRESH))
 
-# with open(FILE_NAME, 'w') as f:
-    # f.write('dir1,dir2,name,area,file_name\n')
+with open(FILE_NAME, 'w') as f:
+    f.write('dir1,dir2,name,area,file_name\n')
 
 detection_graph = tf.Graph()
 with detection_graph.as_default():
@@ -76,6 +78,7 @@ os.makedirs(SAVE_DIRECTORY_EMPTY)
 os.makedirs(SAVE_DIRECTORY_CELLS)
 os.makedirs(ROI_DIRECTORY)
 os.makedirs(SAVE_DIRECTORY_ONE)
+os.makedirs(ROI_DIRECTORY_NORM)
 
 
 with detection_graph.as_default():
@@ -138,3 +141,25 @@ with detection_graph.as_default():
                         copyfile(image_path, os.path.join(empty_dir, image_name))
             # except:
             #     print('controllare struttura cartelle input')
+
+
+# normalise the images
+def normalize(arr):
+    # Do not touch the alpha channel
+    for i in range(3):
+        minval = arr[...,i].min()
+        maxval = arr[...,i].max()
+        if minval != maxval:
+            arr[...,i] -= minval
+            arr[...,i] *= (255.0/(maxval-minval))
+    return arr
+
+for image in tqdm(os.listdir(ROI_DIRECTORY_NORM)):
+    if not image.startswith('.'):
+        image_path = os.path.join(ROI_DIRECTORY_NORM,image)
+        img = Image.open(image_path).convert('RGBA')
+        arr = np.array(img)
+        arr = arr.astype('float')
+        new_img = Image.fromarray(normalize(arr).astype('uint8'),'RGBA')
+        new_img.save(os.path.join(ROI_DIRECTORY_NORM,image))
+
