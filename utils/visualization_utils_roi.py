@@ -163,6 +163,7 @@ def draw_bounding_box_on_image(image,
     (left, right, top, bottom) = (xmin, xmax, ymin, ymax)
   #ritaglio le roi
   image.crop([left,top,right,bottom]).save(os.path.join(save_dir,'{}.png'.format(str(area))))  
+  image.crop([left,top,right,bottom]).save('immagini_da_estrarre_roi/output/roi_norm/{}.png'.format(str(area)))  
   name ='{}.png'.format(str(area))
   save_dir = str(save_dir)
   save_dir = save_dir.split('/')
@@ -179,19 +180,19 @@ def draw_bounding_box_on_image(image,
 
   text_bottom = top
   # Reverse list and print from bottom to top.
-  # for display_str in display_str_list[::-1]:
-  #   text_width, text_height = font.getsize(display_str)
-  #   margin = np.ceil(0.05 * text_height)
-  #   draw.rectangle(
-  #       [(left, text_bottom - text_height - 2 * margin), (left + text_width,
-  #                                                         text_bottom)],
-  #       fill=color)
-  #   draw.text(
-  #       (left + margin, text_bottom - text_height - margin),
-  #       display_str,
-  #       fill=fill_color,
-  #       font=font)
-  #   text_bottom -= text_height - 2 * margin
+  for display_str in display_str_list[::-1]:
+    text_width, text_height = font.getsize(display_str)
+    margin = np.ceil(0.05 * text_height)
+    # draw.rectangle(
+    #     [(left, text_bottom - text_height - 2 * margin), (left + text_width,
+    #                                                       text_bottom)],
+    #     fill=color)
+    # draw.text(
+    #     (left + margin, text_bottom - text_height - margin),
+    #     display_str,
+    #     fill=fill_color,
+    #     font=font)
+    text_bottom -= text_height - 2 * margin
     
 
 
