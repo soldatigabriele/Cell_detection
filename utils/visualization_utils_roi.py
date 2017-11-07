@@ -117,9 +117,7 @@ def draw_bounding_box_on_image_array(image,
       coordinates as absolute.
   """
   image_pil = Image.fromarray(np.uint8(image)).convert('RGB')
-  draw_bounding_box_on_image(image_pil, ymin, xmin, ymax, xmax, save_dir, image_name, thickness, color,
-                             fill_color, display_str_list,
-                             use_normalized_coordinates)
+  draw_bounding_box_on_image(image_pil, ymin, xmin, ymax, xmax, save_dir, image_name, thickness, color, fill_color, display_str_list, use_normalized_coordinates)
   np.copyto(image, np.array(image_pil))
 
 def draw_bounding_box_on_image(image,
@@ -156,18 +154,25 @@ def draw_bounding_box_on_image(image,
   draw = ImageDraw.Draw(image)
   im_width, im_height = image.size
   if use_normalized_coordinates:
-    (left, right, top, bottom) = (xmin * im_width, xmax * im_width,
-                                  ymin * im_height, ymax * im_height)
+    (left, right, top, bottom) = (xmin * im_width, xmax * im_width, ymin * im_height, ymax * im_height)
     area = (abs((left-right)*(bottom-top)))
-  else:
-    (left, right, top, bottom) = (xmin, xmax, ymin, ymax)
+  # else:
+  #   (left, right, top, bottom) = (xmin, xmax, ymin, ymax)
+    # area = (abs((left-right)*(bottom-top)))
   #ritaglio le roi
+  left = int(left)
+  right = int(right)
+  top = int(top)
+  bottom = int(bottom)
+  # image2 = image.crop([left,top,right,bottom])
+  # PATH = os.path.join(save_dir,'aaaa.png')  
+  # image2.save(PATH)
   image.crop([left,top,right,bottom]).save(os.path.join(save_dir,'{}.png'.format(str(area))))  
   image.crop([left,top,right,bottom]).save('immagini_da_estrarre_roi/output/roi_norm/{}.png'.format(str(area)))  
   name ='{}.png'.format(str(area))
   save_dir = str(save_dir)
   save_dir = save_dir.split('/')
-  with open('immagini_da_estrarre_roi/summary_rois.csv', 'a') as f:
+  with open('immagini_da_estrarre_roi/output/summary_rois.csv', 'a') as f:
       f.write('{},{},{},{},{}\n'.format(save_dir[-2],save_dir[-1],image_name,area,name))
   #draw the bb
   if thickness != 0:
