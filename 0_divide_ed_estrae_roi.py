@@ -51,8 +51,21 @@ ROI_DIRECTORY = os.path.join(OUTPUT, 'roi')
 ROI_DIRECTORY_NORM = os.path.join(OUTPUT, 'roi_norm')
 
 DIVISE = os.path.join(DIR,'output')
-FILE_NAME=os.path.join(DIR,'summary_rois.csv')
-FILE_NAME_XLSX = os.path.join(DIR,'summary_rois.xlsx')
+FILE_NAME=os.path.join(DIVISE,'summary_rois.csv')
+FILE_NAME_XLSX = os.path.join(DIVISE,'summary_rois.xlsx')
+
+if os.path.exists(DIVISE):
+    shutil.rmtree(DIVISE)
+
+# if os.path.exists(FILE_NAME_XLSX):
+#     os.unlink(FILE_NAME_XLSX)
+
+os.makedirs(DIVISE)
+os.makedirs(SAVE_DIRECTORY_EMPTY)
+os.makedirs(SAVE_DIRECTORY_CELLS)
+os.makedirs(ROI_DIRECTORY)
+os.makedirs(SAVE_DIRECTORY_ONE)
+os.makedirs(ROI_DIRECTORY_NORM)
 
 with open(FILE_NAME, 'w') as f:
     f.write('dir1,dir2,name,area,file_name\n')
@@ -74,18 +87,6 @@ def load_image_into_numpy_array(image):
   return np.array(image.getdata()).reshape(
       (im_height, im_width, 3)).astype(np.uint8)
 
-if os.path.exists(DIVISE):
-    shutil.rmtree(DIVISE)
-
-if os.path.exists(FILE_NAME_XLSX):
-    os.unlink(FILE_NAME_XLSX)
-
-os.makedirs(DIVISE)
-os.makedirs(SAVE_DIRECTORY_EMPTY)
-os.makedirs(SAVE_DIRECTORY_CELLS)
-os.makedirs(ROI_DIRECTORY)
-os.makedirs(SAVE_DIRECTORY_ONE)
-os.makedirs(ROI_DIRECTORY_NORM)
 
 
 with detection_graph.as_default():
@@ -182,3 +183,7 @@ df = df.sort_values(by=['file_name'])
 writer = pd.ExcelWriter(FILE_NAME_XLSX)
 df.to_excel(writer,sheet_name='summary_rois.csv',index=False)
 writer.save()
+
+#delete the csv file
+if os.path.exists(FILE_NAME):
+    os.unlink(FILE_NAME)
